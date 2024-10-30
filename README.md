@@ -1,118 +1,122 @@
 <p align="center" width="100%">
-<a target="_blank"><img src="figs/VCD_logo_title.png" alt="Visual Contrastive Decoding" style="width: 75%; min-width: 200px; display: block; margin: auto;"></a>
+<img src="assets/yagna.png" width="20%" alt="RITUAL">
 </p>
 
-# VCD: Mitigating Object Hallucinations in Large Vision-Language Models through Visual Contrastive Decoding
-<!-- **VCD: Mitigating Object Hallucinations in Large Vision-Language Models through Visual Contrastive Decoding** -->
-This is the official repo for Visual Contrastive Decoding, a simple, training-free method for mitigating hallucinations in LVLMs during decoding without utilizing external tools.
 
+# RITUAL: Random Image Transformations as a Universal Anti-hallucination Lever in LVLMs
+
+<!-- Arxiv Link, Project Link -->
 <div style='display:flex; gap: 0.25rem; '>
-<a href='LICENCE'><img src='https://img.shields.io/badge/License-Apache 2.0-g.svg'></a>
-<a href='https://arxiv.org/abs/2311.16922'><img src='https://img.shields.io/badge/Paper-PDF-red'></a>
-<a href='https://twitter.com/Leon_L_S_C'><img src='https://img.shields.io/twitter/url/https/twitter.com/cloudposse.svg?style=social&label=Follow%20%40Us'></a>
+<a href="https://arxiv.org/abs/2405.17821"><img src="https://img.shields.io/badge/arXiv-2405.17821-b31b1b.svg"></a>
+<a href="https://sangminwoo.github.io/RITUAL"><img src="https://img.shields.io/badge/Project%20Page-online-brightgreen"></a>
+<a href='LICENSE'><img src='https://img.shields.io/badge/License-MIT-blue.svg'></a>
 </div>
 
-## 🔥 Update
-* [2024-04-05]: ⭐️⭐️⭐️ VCD is selected as Poster Highlight in CVPR 2024! (Top 11.9% in accepted papers)
-* [2023-11-29]: ⭐️ Paper of VCD online. Check out [this link](https://arxiv.org/abs/2311.16922) for details.
-* [2023-11-28]: 🚀 Codes released.
-
-## 🎯 Overview
-![VCD](figs/figure1.png)
-- We introduce Visual Contrastive Decoding (VCD), **a simple and training-free** method that contrasts output distributions derived from original and distorted visual inputs.
-- The new **contrastive probability distribution** for decoding is formulated as follows:
-```math
-p_{vcd}(y \mid v, v', x) = softmax[ (1+\alpha)\times logit_\theta (y \mid v, x) - \alpha \times logit_\theta(y \mid v', x)],
-```
-- The proposed VCD effectively reduces the over-reliance on **statistical bias** and **unimodal priors**, two essential causes of object hallucinations.
+This repository contains the official pytorch implementation of the paper: "RITUAL: Random Image Transformations as a Universal Anti-hallucination Lever in LVLMs".
 
 
-## 🕹️ Usage
-### Environment Setup
+## Updates
+
+ * **2024.05.29**: Build project page
+ * **2024.05.29**: RITUAL Paper online
+ * **2024.05.28**: Code Release
+
+
+## Overview
+
+<p align="center" width="100%">
+<img src="assets/overview.png" width="100%" alt="Overview">
+</p>
+When conditioned on the original image, the probabilities for Blue (correct) and Red (hallucinated) responses are similar, which can lead to the hallucinated response being easily sampled.
+RITUAL leverages an additional probability distribution conditioned on the transformed image, where the likelihood of hallucination is significantly reduced.
+Consequently, the response is sampled from a linear combination of the two probability distributions, ensuring more accurate and reliable outputs.
+
+
+
+## Setup
+
 ```bash
-conda create -yn vcd python=3.9
-conda activate vcd
-cd VCD
+conda create RITUAL python=3.10
+conda activate RITUAL
+git clone https://github.com/sangminwoo/RITUAL.git
+cd RITUAL
 pip install -r requirements.txt
 ```
 
-### How to Use VCD in LVLMs
 
-The two core function of VCD, adding noise to images and generating text based on VCD sampling, are found in the `vcd_utils` folder. Scripts for using VCD sampling in LLaVA, InstructBLIP, and QwenVL are located in `VCD/eval`. We have annotated some key changes with `## cd_comment` for easy location using ctrl+f.
+## Models
 
-To help you get started quickly, here's an example using LLaVA on how to replace the conventional sampling method with the VCD method during generation:
-1. Add the following at the beginning of the start-up script:
-```python
-from vcd_utils.vcd_sample import evolve_vcd_sampling
-evolve_vcd_sampling()
-```
-The `evolve_vcd_sampling` function replaces the sampling function in the transformers library. The modified sampling function includes an option for visual contrastive decoding, while keeping the rest unchanged.
+*About model checkpoints preparation*
+* [**LLaVA-1.5**](https://github.com/haotian-liu/LLaVA): Download [LLaVA-1.5 merged 7B](https://huggingface.co/liuhaotian/llava-v1.5-7b)
+* [**InstructBLIP**](https://github.com/salesforce/LAVIS/tree/main/projects/instructblip): Download [InstructBLIP](https://huggingface.co/Salesforce/instructblip-vicuna-7b)
 
-2. Slightly modify `llava_llama.py`:
 
-   a. Add contrastive decoding parameters in the `LlavaLlamaForCausalLM` class's `forward` function to avoid exceptions in `model.generate`.
-   
-   b. Add the `prepare_inputs_for_generation_cd` function.
 
-3. Add noise to the image:
-```python
-from vcd_utils.vcd_add_noise import add_diffusion_noise
-image_tensor_cd = add_diffusion_noise(image_tensor, args.noise_step)
-```
-set the hyperparameter in the `generate` function:
-```python
-output_ids = model.generate(
-    input_ids,
-    images=image_tensor.unsqueeze(0).half().cuda(),
-    images_cd=(image_tensor_cd.unsqueeze(0).half().cuda() if image_tensor_cd is not None else None),
-    cd_alpha = args.cd_alpha,
-    cd_beta = args.cd_beta,
-    do_sample=True)
-```
+## Evaluation
 
-## 🏅 Experiments
-- **VCD significantly mitigates the object hallucination issue across different LVLM families.**
-![exp1](figs/exp1.png)
-*table 1(Part of). Results on POPE. Regular decoding denotes direct sampling, whereas VCD refers to sampling from our proposed contrastive distribution pvcd. The best performances within each setting are bolded.*
+* **POPE**: `bash eval_bench/scripts/pope_eval.sh` 
+  - Need to specify "model", "model_path"
+* **CHAIR**: `bash eval_bench/scripts/chair_eval.sh`
+  - Need to specify "model", "model_path", "type"
+* **MME**: `bash experiments/cd_scripts/mme_eval.sh`
+  - Need to specify "model", "model_path"
 
-- **Beyond mitigating object hallucinations, VCD also excels in general LVLM benchmarks, highlighting its wide-ranging applicability.**
-![exp2](figs/exp2.png)
-*figure 4. MME full set results on LLaVA-1.5. VCD consistently enhances LVLMs’ perception capacities while preserving their recognition competencies.*
-<p align="center" width="80%">
-<a target="_blank"><img src="figs/exp3.png" alt="GPT4V aided evaluation" style="width: 50%; min-width: 200px; display: block; margin: auto;"></a>
+*About datasets preparation*
+- Please download and extract the MSCOCO 2014 dataset from [this link](https://cocodataset.org/) to your data path for evaluation.
+- For MME evaluation, see [this link](https://github.com/BradyFU/Awesome-Multimodal-Large-Language-Models/tree/Evaluation).
+
+
+## Results
+
+### POPE
+<p align="center" width="100%">
+<img src="assets/pope.png" width="90%" alt="POPE results">
 </p>
 
-*table 3. Results of GPT-4V-aided evaluation on open-ended generation. Accuracy measures the response’s alignment with the image content, and Detailedness gauges the richness of details in the response. Both metrics are on a scale of 10.*
+### MME
+**MME-Fullset**
+<p align="center" width="100%">
+<img src="assets/mme-fullset.png" width="90%" alt="MME-Fullset results">
+</p>
 
-- **Please refer to [our paper](https://arxiv.org/abs/2311.16922) for detailed experimental results.**
+**MME-Hallucination**
+<p align="center" width="100%">
+<img src="assets/mme-hallucination.png" width="90%" alt="MME-Hallucination results">
+</p>
+
+### CHAIR
+<p align="center" width="100%">
+<img src="assets/chair.png" width="40%" alt="CHAIR results">
+</p>
 
 
 
-## 📌 Examples
-![Case1](figs/case.jpg)
-*figure 5. Illustration of hallucination correction by our proposed VCD with two samples from LLaVA-Bench. Hallucinated objects from LVLM's regular decoding are highlighted in red.*
+## Examples
 
-![Case2](figs/case_general.jpg)
-*figure 8. More examples from LLaVA-Bench of our proposed VCD for enhanced general perception and recognition capacities.*
+<p align="center" width="100%">
+<img src="assets/llava_bench.png" width="100%" alt="LLaVA-Bench results">
+</p>
 
-![Case3](figs/case_hallu.jpg)
-*figure 7. More examples from LLaVA-Bench of our proposed VCD for hallucination corrections. Hallucinated objects from LVLM's regular decoding are highlighted in red.*
+<p align="center" width="100%">
+<img src="assets/llava_bench_appendix.png" width="100%" alt="LLaVA-Bench results">
+</p>
 
 
-## 📑 Citation
-If you find our project useful, we hope you can star our repo and cite our paper as follows:
+
+## Acknowledgments
+This codebase borrows from most notably [VCD](https://github.com/DAMO-NLP-SG/VCD), [OPERA](https://github.com/shikiw/OPERA), and [LLaVA](https://github.com/haotian-liu/LLaVA).
+Many thanks to the authors for generously sharing their codes!
+
+
+
+## Citation
+If you find this repository helpful for your project, please consider citing our work :)
+
 ```
-@article{damonlpsg2023vcd,
-  author = {Sicong Leng, Hang Zhang, Guanzheng Chen, Xin Li, Shijian Lu, Chunyan Miao, Lidong Bing},
-  title = {Mitigating Object Hallucinations in Large Vision-Language Models through Visual Contrastive Decoding},
-  year = 2023,
-  journal = {arXiv preprint arXiv:2311.16922},
-  url = {https://arxiv.org/abs/2311.16922}
+@article{woo2024ritual,
+  title={RITUAL: Random Image Transformations as a Universal Anti-hallucination Lever in LVLMs}, 
+  author={Woo, Sangmin and Jang, Jaehyuk and Kim, Donguk and Choi, Yubin and Kim, Changick},
+  journal={arXiv preprint arXiv:2405.17821},
+  year={2024},
 }
 ```
-
-## 📝 Related Projects
-- [Contrastive Decoding](https://github.com/XiangLi1999/ContrastiveDecoding): Open-ended Text Generation as Optimization
-- [InstructBLIP](https://github.com/salesforce/LAVIS/tree/main/projects/instructblip): Towards General-purpose Vision-Language Models with Instruction Tuning
-- [Qwen-VL](https://github.com/QwenLM/Qwen-VL): A Versatile Vision-Language Model for Understanding, Localization, Text Reading, and Beyond
-- [LLaVA 1.5](https://github.com/haotian-liu/LLaVA): Improved Baselines with Visual Instruction Tuning

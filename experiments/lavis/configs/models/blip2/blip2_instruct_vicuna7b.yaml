@@ -9,7 +9,7 @@ model:
   load_pretrained: True
 
   # cd_comments: set right path for pretrained blip ckpt
-  pretrained: "./checkpoints/instruct_blip_vicuna7b_trimmed.pth"
+  pretrained: "/mnt/server18_hard0/jhjang/LVLM/checkpoints/instruct_blip_vicuna7b_trimmed.pth"
 
   finetuned: ""
 
@@ -24,7 +24,7 @@ model:
   num_query_token: 32
 
   # cd_comments: set right path for vicuna
-  llm_model: "/mnt/workspace/ckpt/vicuna-7b-v1.1"
+  llm_model: "/mnt/server8_hard1/donguk/NEURIPS2024/checkpoints/vicuna-7b-v1.1"
 
   # generation configs
   prompt: ""

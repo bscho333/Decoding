@@ -645,15 +645,27 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         position_ids: Optional[torch.LongTensor] = None,
         past_key_values: Optional[List[torch.FloatTensor]] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
-        images_cd: Optional[torch.FloatTensor] = None,
-        cd_beta: Optional[torch.FloatTensor] = None,
-        cd_alpha: Optional[torch.FloatTensor] = None,
+        # images_cd: Optional[torch.FloatTensor] = None,
+        # cd_beta: Optional[torch.FloatTensor] = None,
+        # cd_alpha: Optional[torch.FloatTensor] = None,
         labels: Optional[torch.LongTensor] = None,
         use_cache: Optional[bool] = None,
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         reduction: Optional[str] = "mean",
+        # use_method=None,
+        # layer_loc=None,
+        # token_loc=None,
+        # num_masking=None,
+        ritual_alpha_pos: Optional[torch.FloatTensor] = None,
+        ritual_alpha_neg: Optional[torch.FloatTensor] = None,
+        ritual_beta: Optional[torch.FloatTensor] = None,
+        use_ritual=None,
+        use_vcd=None,
+        use_m3id=None,
+        images_pos: Optional[torch.FloatTensor] = None,
+        images_neg: Optional[torch.FloatTensor] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -762,7 +774,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         return model_inputs
     
     def prepare_inputs_for_generation_cd(
-        self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None, **kwargs
+        self,
+        input_ids,
+        past_key_values=None,
+        attention_mask=None,
+        inputs_embeds=None,
+        **kwargs
     ):
         if past_key_values:
             input_ids = input_ids[:, -1:]
@@ -791,6 +808,127 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         )
         return model_inputs
 
+    def prepare_inputs_for_generation_pos(
+        self,
+        input_ids,
+        past_key_values=None,
+        attention_mask=None,
+        inputs_embeds=None,
+        **kwargs
+    ):
+        if past_key_values:
+            input_ids = input_ids[:, -1:]
+
+        position_ids = kwargs.get("position_ids", None)
+        if attention_mask is not None and position_ids is None:
+            # create position_ids on the fly for batch generation
+            position_ids = attention_mask.long().cumsum(-1) - 1
+            position_ids.masked_fill_(attention_mask == 0, 1)
+            if past_key_values:
+                position_ids = position_ids[:, -1].unsqueeze(-1)
+
+        # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
+        if inputs_embeds is not None and past_key_values is None:
+            model_inputs = {"inputs_embeds": kwargs.get("images_pos")}
+        else:
+            model_inputs = {"input_ids": input_ids}
+
+        model_inputs.update(
+            {
+                "position_ids": position_ids,
+                "past_key_values": past_key_values,
+                "use_cache": kwargs.get("use_cache"),
+                "attention_mask": attention_mask,
+            }
+        )
+        return model_inputs
+    
+    
+    
+    def prepare_inputs_for_generation_neg(
+        self,
+        input_ids,
+        past_key_values=None,
+        attention_mask=None,
+        inputs_embeds=None,
+        **kwargs
+    ):  
+        if past_key_values:
+            input_ids = input_ids[:, -1:]
+
+        position_ids = kwargs.get("position_ids", None)
+        if attention_mask is not None and position_ids is None:
+            # create position_ids on the fly for batch generation
+            position_ids = attention_mask.long().cumsum(-1) - 1
+            position_ids.masked_fill_(attention_mask == 0, 1)
+            if past_key_values:
+                position_ids = position_ids[:, -1].unsqueeze(-1)
+
+        # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
+        if inputs_embeds is not None and past_key_values is None:
+            model_inputs = {"inputs_embeds": kwargs.get("images_neg")}
+        else:
+            model_inputs = {"input_ids": input_ids}
+
+        model_inputs.update(
+            {
+                "position_ids": position_ids,
+                "past_key_values": past_key_values,
+                "use_cache": kwargs.get("use_cache"),
+                "attention_mask": attention_mask,
+            }
+        )
+        return model_inputs
+    
+    def prepare_inputs_for_generation_m3id(
+        self,
+        input_ids,
+        past_key_values=None,
+        attention_mask=None,
+        inputs_embeds=None,
+        **kwargs
+    ):  
+        if past_key_values:
+            input_ids = input_ids[:, -1:]
+
+        position_ids = kwargs.get("position_ids", None)
+        
+        
+        if attention_mask is not None and position_ids is None:
+            # create position_ids on the fly for batch generation
+            position_ids = attention_mask.long().cumsum(-1) - 1
+            position_ids.masked_fill_(attention_mask == 0, 1)
+            if past_key_values:
+                position_ids = position_ids[:, -1].unsqueeze(-1)
+        
+        
+        if past_key_values is None:
+            position_ids = position_ids[:,:inputs_embeds.size(1)-32]
+        else:
+            position_ids -= 32
+        attention_mask = attention_mask[:,:inputs_embeds.size(1)-32]
+            
+            
+        # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
+        if inputs_embeds is not None and past_key_values is None:
+            # model_inputs = {"inputs_embeds": kwargs.get("images_neg")}
+            model_inputs = {"inputs_embeds": inputs_embeds[:,32:,:]}
+        else:
+            model_inputs = {"input_ids": input_ids}
+        model_inputs.update(
+            {
+                # "position_ids": position_ids,
+                "position_ids": position_ids,
+                "past_key_values": past_key_values,
+                "use_cache": kwargs.get("use_cache"),
+                "attention_mask": None,
+            }
+        )
+        # import pdb; pdb.set_trace()
+        
+        return model_inputs
+    
+    
     @staticmethod
     def _reorder_cache(past_key_values, beam_idx):
         reordered_past = ()

@@ -34,8 +34,8 @@ max_new_tokens=64
 #####################################
 echo "Running chair_eval_${model}.py"
 export CUDA_VISIBLE_DEVICES=0
-torchrun --nnodes=1 --nproc_per_node=1 --master_port 2222 eval_bench/chair_eval_${model}.py \
-# python eval_bench/chair_eval_${model}_single.py \
+# torchrun --nnodes=1 --nproc_per_node=1 --master_port 2222 eval_bench/chair_eval_${model}.py \
+python eval_bench/chair_eval_${model}_single.py \
 --seed ${seed} \
 --model_path ${model_path} \
 --model_base ${model} \

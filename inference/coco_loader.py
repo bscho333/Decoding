@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 from PIL import Image
 
 
-class CHAIRDataset(Dataset):
+class COCODataset(Dataset):
     def __init__(self, data_path, anno_path, trans, model):
         self.data_path = data_path
         self.anno_path = anno_path

@@ -29,7 +29,7 @@ import re
 from PIL import Image
 from torchvision.transforms import v2
 
-from coco_loader import COCODataset
+from chair_loader import CHAIRDataset
 
 # import kornia
 from ritual_utils.ritual_sample import evolve_ritual_sampling
@@ -51,29 +51,9 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def image_parser(args):
-    data_list = [json.loads(file) for file in open(os.path.expanduser(args.image_list), "r")]
-    out = []
-    for data in data_list:
-        image_file = data["image"]
-        image = load_image(image_file, args.data_path)
-        out.append(image)
-    return out
-
-
-def load_image(image_file, image_folder=None):
-    if image_file.startswith("http") or image_file.startswith("https"):
-        response = requests.get(image_file)
-        image = Image.open(BytesIO(response.content)).convert("RGB")
-    elif image_file.isdigit():
-        image = Image.open(image_folder + "COCO_val2014_000000" + image_file + ".jpg").convert("RGB")
-    else:
-        image = Image.open(image_file).convert("RGB")
-    return image
-
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Inference via LLaVA")
+    parser = argparse.ArgumentParser(description="POPE-Adv evaluation on LVLMs.")
     parser.add_argument("--model_path", type=str, help="model")
     parser.add_argument("--model_base", type=str, default="llava")
 
@@ -86,9 +66,6 @@ def parse_args():
     parser.add_argument("--anno_path", type=str, default="/mnt/server17_hard1/sangmin/data/coco/annotations/instances_val2014.json")
     parser.add_argument("--log_path", type=str, default="/mnt/server16_hard0/sangmin/code/neurips2024/logs/chair")
     parser.add_argument("--out_path", type=str, default="/mnt/server16_hard0/sangmin/code/neurips2024/chair_results/llava", help="output path")
-
-    parser.add_argument("--image_list", type=str, default="/home/bscho333/Workspace/experiment/image_list.json")
-    parser.add_argument("--question", type=str, default="Please describe this image in detail.")
 
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--batch_size", type=int, default=1, help="batch size")
@@ -116,23 +93,23 @@ def parse_args():
 def main():
     args = parse_args()
     # Setup DDP:
-    dist_util.setup_dist(args)
-    device = dist_util.device()
+    # dist_util.setup_dist(args)
+    # device = dist_util.device()
 
     # Setup an experiment folder:
-    if dist.get_rank() == 0:
-        os.makedirs(
-            args.log_path, exist_ok=True
-        )  # Make results folder (holds all experiment subfolders)
-        model_string_name = args.model_path.split("/")[-1]
-        # experiment_index = len(glob(f"{args.log_path}/{model_string_name}/*")) + args.experiment_index
-        experiment_index = args.experiment_index
-        experiment_dir = f"{args.log_path}/{model_string_name}/{experiment_index}"  # Create an experiment folder
-        os.makedirs(experiment_dir, exist_ok=True)
-        logger = create_logger(experiment_dir)
-        logger.info(f"Experiment directory created at {experiment_dir}")
-    else:
-        logger = create_logger(None)
+    # if dist.get_rank() == 0:
+    os.makedirs(
+        args.log_path, exist_ok=True
+    )  # Make results folder (holds all experiment subfolders)
+    model_string_name = args.model_path.split("/")[-1]
+    # experiment_index = len(glob(f"{args.log_path}/{model_string_name}/*")) + args.experiment_index
+    experiment_index = args.experiment_index
+    experiment_dir = f"{args.log_path}/{model_string_name}/{experiment_index}"  # Create an experiment folder
+    os.makedirs(experiment_dir, exist_ok=True)
+    logger = create_logger(experiment_dir)
+    logger.info(f"Experiment directory created at {experiment_dir}")
+    # else:
+    #     logger = create_logger(None)
 
     # ========================================
     #             Model & Dataset
@@ -145,19 +122,19 @@ def main():
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, None, model_name)
 
-    # chair_dataset = COCODataset(
-    #     data_path=args.data_path,
-    #     anno_path=args.anno_path,
-    #     trans=image_processor,
-    #     model=args.model_base
-    # )
-    # chair_loader = DataLoader(
-    #     chair_dataset, 
-    #     batch_size=args.batch_size, 
-    #     shuffle=False, 
-    #     num_workers=args.num_workers,
-    #     drop_last=False
-    # )
+    chair_dataset = CHAIRDataset(
+        data_path=args.data_path,
+        anno_path=args.anno_path,
+        trans=image_processor,
+        model=args.model_base
+    )
+    chair_loader = DataLoader(
+        chair_dataset, 
+        batch_size=args.batch_size, 
+        shuffle=False, 
+        num_workers=args.num_workers,
+        drop_last=False
+    )
 
     os.makedirs(
         args.out_path, exist_ok=True

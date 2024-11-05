@@ -13,8 +13,8 @@ model_path="/home/bscho333/data/llava-v1.5-7b"
 coco_path="/home/bscho333/data/coco"
 img_path="${coco_path}/val2014/"
 anno_path="${coco_path}/annotations/instances_val2014.json"
-log_path="./logs/chair"
-out_path="./chair_results/${model}"
+log_path="/home/bscho333/Decoding/output/logs/chair"
+out_path="/home/bscho333/Decoding/output/chair_results"
 
 use_ritual=False
 use_vcd=False
@@ -33,9 +33,9 @@ max_new_tokens=64
 # Run experiment
 #####################################
 echo "Running chair_eval_${model}.py"
+echo "log_path: ${log_path}"
 export CUDA_VISIBLE_DEVICES=0
 torchrun --nnodes=1 --nproc_per_node=1 --master_port 2222 eval_bench/chair_eval_${model}.py \
-# python eval_bench/chair_eval_${model}_single.py \
 --seed ${seed} \
 --model_path ${model_path} \
 --model_base ${model} \

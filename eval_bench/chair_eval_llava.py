@@ -13,6 +13,7 @@ from tqdm import tqdm
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/experiments')
+print("import 1/3")
 # print(sys.path)
 
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
@@ -20,6 +21,7 @@ from llava.conversation import conv_templates, Conversation, SeparatorStyle
 from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, get_model_name_from_path, KeywordsStoppingCriteria
+print("import 2/3")
 
 from utils import dist_util
 from utils.logger import create_logger
@@ -30,6 +32,7 @@ from PIL import Image
 from torchvision.transforms import v2
 
 from chair_loader import CHAIRDataset
+print("import 3/3")
 
 # import kornia
 from ritual_utils.ritual_sample import evolve_ritual_sampling
@@ -91,7 +94,10 @@ def parse_args():
 
 
 def main():
+    print("first line of chair_eval_llava.py")
     args = parse_args()
+    print("args: ", args)
+    print("args.log_path: ", args.log_path)
     # Setup DDP:
     dist_util.setup_dist(args)
     device = dist_util.device()
@@ -115,12 +121,26 @@ def main():
     #             Model & Dataset
     # ========================================
     logger.info('Initializing Model')
+    print("Initializing Model")
 
     #### for ritual
     disable_torch_init()
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
+    print(f"model_name: {model_name}")
+    print(f"model_path: {model_path}")
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, None, model_name)
+    print("Model loaded")
+
+        
+    # print(f"model.config: {model.config}")
+    # print(f"model.config.image_size: {model.config.image_size}")
+    # print(f"model.config.image_feature_size: {model.config.image_feature_size}")
+    # print(f"model.config.image_feature_proj: {model.config.image_feature_proj}")
+    # print(f"model.config.image_aspect_ratio: {model.config.image_aspect_ratio}")
+    
+
+    
 
     chair_dataset = CHAIRDataset(
         data_path=args.data_path,
@@ -135,6 +155,7 @@ def main():
         num_workers=args.num_workers,
         drop_last=False
     )
+    print("Dataset loaded")
 
     os.makedirs(
         args.out_path, exist_ok=True
@@ -160,6 +181,7 @@ def main():
     #            Start Generation
     # ========================================
     logger.info("Start eval...")
+    print("Start eval...")
     for batch_id, data in tqdm(enumerate(chair_loader), total=args.num_eval_samples):
 
         # early stop for debuggging purpose

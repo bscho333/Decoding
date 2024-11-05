@@ -9,7 +9,7 @@ class CHAIRDataset(Dataset):
     def __init__(self, data_path, anno_path, trans, model):
         self.data_path = data_path
         self.anno_path = anno_path
-        self.trans = trans
+        self.trans = trans # Image_Processor
         self.model = model
         
         with open(self.anno_path, 'r') as f:

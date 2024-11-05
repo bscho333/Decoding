@@ -14,7 +14,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/experiments')
 print(sys.path)
-return 0
 
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, Conversation, SeparatorStyle
@@ -220,7 +219,7 @@ def main():
         with torch.no_grad():
             output_ids = model.generate(
                 input_ids,
-                images=images_tensor
+                images=images_tensor,
                 images_pos=(image_pos.unsqueeze(0).half().cuda() if image_pos is not None else None),
                 images_neg=(image_neg.unsqueeze(0).half().cuda() if image_neg is not None else None),
                 image_sizes=image_sizes,
@@ -250,7 +249,7 @@ def main():
     outputs = outputs.strip()
 
     logger.info(f"[VQA for ritual]")
-    logger.info(f"V: {cfglst[0]["image_id"]}")
+    logger.info(f"V: {cfglst[0]['image_id']}")
     logger.info(f"Q: {qs}")
     logger.info(f"A: {outputs}")
     logger.info(f"="*50)
@@ -280,4 +279,5 @@ def main():
         logger.info(f"RITUAL Transformation: {pos_aug_counter}")
 
 if __name__ == "__main__":
-    main()
+    # main()
+    print("Hello World")

@@ -1,0 +1,39 @@
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 04:34:41
+# Command: ls; hello; ps -ef | grep bscho333
+########################################
+1031nohup.out
+1105_1_nohup.out
+1105_2_nohup.out
+1105_3_nohup.out
+Demo_of_GLIP.ipynb
+GLIP
+LICENSE
+README.md
+RITUAL_conda_list.out
+RITUAL_pip_list.out
+assets
+chair.pkl
+eval_bench
+experiments
+inference
+memo.md
+nohup.sh
+output
+requirements.txt
+ritual_utils
+unknown_nohup.out
+utils
+bscho333 1781275 1781269  0 Nov04 pts/1    00:00:00 /bin/bash
+bscho333 1930213       1  0 04:34 pts/1    00:00:00 bash -c ls; hello; ps -ef | grep bscho333
+bscho333 1930214 1930213  0 04:34 pts/1    00:00:00 /bin/bash ./nohup.sh ls; hello; ps -ef | grep bscho333
+bscho333 1930215 1930213  0 04:34 pts/1    00:00:00 /bin/bash ./nohup.sh ls; hello; ps -ef | grep bscho333
+bscho333 1930216 1930215  0 04:34 pts/1    00:00:00 tee -a ./output/nohup/etc/20241106.log ./output/nohup/etc/20241106.err
+bscho333 1930217 1930214  0 04:34 pts/1    00:00:00 tee -a ./output/nohup/etc/20241106.log ./output/nohup/etc/20241106.out
+bscho333 1930220 1930213  0 04:34 pts/1    00:00:00 ps -ef
+bscho333 1930221 1930213  0 04:34 pts/1    00:00:00 grep bscho333

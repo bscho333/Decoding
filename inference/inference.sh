@@ -33,7 +33,7 @@ max_new_tokens=64
 # Run experiment
 #####################################
 export CUDA_VISIBLE_DEVICES=0
-torchrun --nnodes=1 --nproc_per_node=1 --master_port 2222 inference_${model}.py \
+torchrun --nnodes=1 --nproc_per_node=1 --master_port 2222 inference/inference_${model}.py \
 --seed ${seed} \
 --model_path ${model_path} \
 --model_base ${model} \
@@ -51,15 +51,15 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port 2222 inference_${model}.py 
 --max_new_tokens ${max_new_tokens} \
 --experiment_index ${experiment_index}
 
-#####################################
-# Run evaluation
-#####################################
-experiment_index=000
-cap_json_path="${out_path}/exp_${experiment_index}.jsonl"
-echo ${cap_json_path}
-python eval_bench/chair.py \
---cap_file ${cap_json_path} \
---coco_path ${coco_path}/annotations \
---save_path ${out_path}/exp_${experiment_index}_result.jsonl \
---image_id_key image_id \
---caption_key caption
+# #####################################
+# # Run evaluation
+# #####################################
+# experiment_index=000
+# cap_json_path="${out_path}/exp_${experiment_index}.jsonl"
+# echo ${cap_json_path}
+# python eval_bench/chair.py \
+# --cap_file ${cap_json_path} \
+# --coco_path ${coco_path}/annotations \
+# --save_path ${out_path}/exp_${experiment_index}_result.jsonl \
+# --image_id_key image_id \
+# --caption_key caption

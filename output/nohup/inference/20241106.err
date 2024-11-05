@@ -1,0 +1,191 @@
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 04:50:52
+# Command: bash inference/inference.sh
+# Comment: first attempt of inference.sh
+########################################
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/datapoints/__init__.py:12: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/transforms/v2/__init__.py:54: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 04:55:49
+# Command: bash inference/inference.sh
+# Comment: REAL first attempt of inference.sh
+########################################
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/datapoints/__init__.py:12: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/transforms/v2/__init__.py:54: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+[2024-11-06 04:56:03] Experiment directory created at ./logs/chair/llava-v1.5-7b/0
+[2024-11-06 04:56:03] Initializing Model
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.92s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.83s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  2.00s/it]
+[2024-11-06 04:56:11] Start eval...
+Traceback (most recent call last):
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 282, in <module>
+    main()
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 207, in main
+    images, cfglst = image_parser(args)
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 57, in image_parser
+    data_list = [json.loads(file) for file in open(os.path.expanduser(args.image_list), "r")]
+FileNotFoundError: [Errno 2] No such file or directory: '/home/bscho333/Workspace/experiment/image_list.json'
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 1931116) of binary: /home/bscho333/anaconda3/envs/RITUAL/bin/python
+Traceback (most recent call last):
+  File "/home/bscho333/anaconda3/envs/RITUAL/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/run.py", line 794, in main
+    run(args)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/run.py", line 785, in run
+    elastic_launch(
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 250, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+inference/inference_llava.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-11-06_04:56:13
+  host      : node01.localdomain
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 1931116)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 05:02:54
+# Command: bash inference/inference.sh
+# Comment: added image_list.jsonl and modified sh and py for locating image_list, log path
+########################################
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/datapoints/__init__.py:12: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/transforms/v2/__init__.py:54: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+[2024-11-06 05:03:04] Experiment directory created at /home/bscho333/Decoding/output/logs/inference/llava-v1.5-7b/0
+[2024-11-06 05:03:04] Initializing Model
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.92s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.83s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.99s/it]
+[2024-11-06 05:03:12] Start eval...
+Traceback (most recent call last):
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 282, in <module>
+    main()
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 220, in main
+    output_ids = model.generate(
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/transformers/generation/utils.py", line 1282, in generate
+    self._validate_model_kwargs(model_kwargs.copy())
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/transformers/generation/utils.py", line 1155, in _validate_model_kwargs
+    raise ValueError(
+ValueError: The following `model_kwargs` are not used by the model: ['image_sizes'] (note: typos in the generate arguments will also show up in this list)
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 1931505) of binary: /home/bscho333/anaconda3/envs/RITUAL/bin/python
+Traceback (most recent call last):
+  File "/home/bscho333/anaconda3/envs/RITUAL/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/run.py", line 794, in main
+    run(args)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/run.py", line 785, in run
+    elastic_launch(
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 250, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+inference/inference_llava.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-11-06_05:03:13
+  host      : node01.localdomain
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 1931505)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 05:08:03
+# Command: bash inference/inference.sh
+# Comment: deleted image_sizes at line 225, in inference_llava.py
+########################################
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/datapoints/__init__.py:12: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torchvision/transforms/v2/__init__.py:54: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+[2024-11-06 05:08:10] Experiment directory created at /home/bscho333/Decoding/output/logs/inference/llava-v1.5-7b/0
+[2024-11-06 05:08:10] Initializing Model
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.91s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.82s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.98s/it]
+[2024-11-06 05:08:19] Start eval...
+[2024-11-06 05:08:29] [VQA for ritual]
+[2024-11-06 05:08:29] V: 324158
+[2024-11-06 05:08:29] Q: Please describe this image in detail.
+[2024-11-06 05:08:29] A: The image features a man with a skateboard and a dog, either walking down the street together or crossing the street while holding hands with the dog on a leash. The man appears to be skateboarding with the dog close by, creating a fun and friendly atmosphere. 
+
+There are a few
+[2024-11-06 05:08:29] ==================================================
+Traceback (most recent call last):
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 282, in <module>
+    main()
+  File "/home/bscho333/Decoding/inference/inference_llava.py", line 258, in main
+    img_save["image_id"] = img_id.item()
+NameError: name 'img_id' is not defined
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 1931771) of binary: /home/bscho333/anaconda3/envs/RITUAL/bin/python
+Traceback (most recent call last):
+  File "/home/bscho333/anaconda3/envs/RITUAL/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/run.py", line 794, in main
+    run(args)
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/run.py", line 785, in run
+    elastic_launch(
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 250, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+inference/inference_llava.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-11-06_05:08:31
+  host      : node01.localdomain
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 1931771)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

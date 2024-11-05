@@ -1,0 +1,13 @@
+[2024-11-06 05:03:04] Experiment directory created at /home/bscho333/Decoding/output/logs/inference/llava-v1.5-7b/0
+[2024-11-06 05:03:04] Initializing Model
+[2024-11-06 05:03:12] Start eval...
+[2024-11-06 05:08:10] Experiment directory created at /home/bscho333/Decoding/output/logs/inference/llava-v1.5-7b/0
+[2024-11-06 05:08:10] Initializing Model
+[2024-11-06 05:08:19] Start eval...
+[2024-11-06 05:08:29] [VQA for ritual]
+[2024-11-06 05:08:29] V: 324158
+[2024-11-06 05:08:29] Q: Please describe this image in detail.
+[2024-11-06 05:08:29] A: The image features a man with a skateboard and a dog, either walking down the street together or crossing the street while holding hands with the dog on a leash. The man appears to be skateboarding with the dog close by, creating a fun and friendly atmosphere. 
+
+There are a few
+[2024-11-06 05:08:29] ==================================================

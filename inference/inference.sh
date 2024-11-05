@@ -13,8 +13,8 @@ model_path="/home/bscho333/data/llava-v1.5-7b"
 coco_path="/home/bscho333/data/coco"
 img_path="${coco_path}/val2014/"
 anno_path="${coco_path}/annotations/instances_val2014.json"
-log_path="./logs/chair"
-out_path="./inference_results/${model}"
+log_path="/home/bscho333/Decoding/output/logs/inference"
+out_path="/home/bscho333/Decoding/output/inference_results"
 
 use_ritual=False
 use_vcd=False

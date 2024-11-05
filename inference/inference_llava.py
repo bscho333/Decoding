@@ -94,7 +94,7 @@ def parse_args():
     parser.add_argument("--log_path", type=str, default="/mnt/server16_hard0/sangmin/code/neurips2024/logs/chair")
     parser.add_argument("--out_path", type=str, default="/mnt/server16_hard0/sangmin/code/neurips2024/chair_results/llava", help="output path")
 
-    parser.add_argument("--image_list", type=str, default="/home/bscho333/Workspace/experiment/image_list.json")
+    parser.add_argument("--image_list", type=str, default="/home/bscho333/Decoding/inference/image_list.jsonl")
     parser.add_argument("--question", type=str, default="Please describe this image in detail.")
 
     parser.add_argument("--seed", type=int, default=42)
@@ -222,7 +222,7 @@ def main():
                 images=images_tensor,
                 images_pos=(image_pos.unsqueeze(0).half().cuda() if image_pos is not None else None),
                 images_neg=(image_neg.unsqueeze(0).half().cuda() if image_neg is not None else None),
-                image_sizes=image_sizes,
+                # image_sizes=image_sizes,
                 do_sample=True,
                 temperature=args.temperature,
                 top_p=args.top_p,
@@ -248,7 +248,7 @@ def main():
         outputs = outputs[:-len(stop_str)]
     outputs = outputs.strip()
 
-    logger.info(f"[VQA for ritual]")
+    logger.info(f"[inference]")
     logger.info(f"V: {cfglst[0]['image_id']}")
     logger.info(f"Q: {qs}")
     logger.info(f"A: {outputs}")
@@ -279,5 +279,5 @@ def main():
         logger.info(f"RITUAL Transformation: {pos_aug_counter}")
 
 if __name__ == "__main__":
-    # main()
-    print("Hello World")
+    main()
+    # print("Hello World")

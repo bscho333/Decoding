@@ -1,0 +1,52 @@
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 04:50:52
+# Command: bash inference/inference.sh
+# Comment: first attempt of inference.sh
+########################################
+['/home/bscho333/Decoding/inference', '/home/bscho333/anaconda3/envs/RITUAL/lib/python310.zip', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/lib-dynload', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages', '/home/bscho333', '/home/bscho333/Decoding', '/home/bscho333/Decoding/experiments']
+Hello World
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 04:55:49
+# Command: bash inference/inference.sh
+# Comment: REAL first attempt of inference.sh
+########################################
+['/home/bscho333/Decoding/inference', '/home/bscho333/anaconda3/envs/RITUAL/lib/python310.zip', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/lib-dynload', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages', '/home/bscho333', '/home/bscho333/Decoding', '/home/bscho333/Decoding/experiments']
+Starting rank=0, seed=42, world_size=1, device=0
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 05:02:54
+# Command: bash inference/inference.sh
+# Comment: added image_list.jsonl and modified sh and py for locating image_list, log path
+########################################
+['/home/bscho333/Decoding/inference', '/home/bscho333/anaconda3/envs/RITUAL/lib/python310.zip', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/lib-dynload', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages', '/home/bscho333', '/home/bscho333/Decoding', '/home/bscho333/Decoding/experiments']
+Starting rank=0, seed=42, world_size=1, device=0
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################
+# Run Time: 2024/11/06 05:08:03
+# Command: bash inference/inference.sh
+# Comment: deleted image_sizes at line 225, in inference_llava.py
+########################################
+['/home/bscho333/Decoding/inference', '/home/bscho333/anaconda3/envs/RITUAL/lib/python310.zip', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/lib-dynload', '/home/bscho333/anaconda3/envs/RITUAL/lib/python3.10/site-packages', '/home/bscho333', '/home/bscho333/Decoding', '/home/bscho333/Decoding/experiments']
+Starting rank=0, seed=42, world_size=1, device=0
+use_ritual =  False
+use_vcd =  False
+use_m3id =  False
+input_token_len 50

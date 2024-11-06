@@ -81,7 +81,7 @@ def load_image(image_file, image_folder=None):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Inference via LLaVA")
-    parser.add_argument("--model_path", type=str, help="model")
+    parser.add_argument("--model_path", type=str, default="/home/bscho333/data/llava-v1.5-7b")
     parser.add_argument("--model_base", type=str, default="llava")
 
     parser.add_argument("--conv_mode", type=str, default="llava_v1")
@@ -89,10 +89,10 @@ def parse_args():
     parser.add_argument("--top_p", type=float, default=1)
     parser.add_argument("--top_k", type=int, default=None)
 
-    parser.add_argument("--data_path", type=str, default="/mnt/server17_hard1/sangmin/data/coco/val2014/", help="data path")
-    parser.add_argument("--anno_path", type=str, default="/mnt/server17_hard1/sangmin/data/coco/annotations/instances_val2014.json")
-    parser.add_argument("--log_path", type=str, default="/mnt/server16_hard0/sangmin/code/neurips2024/logs/chair")
-    parser.add_argument("--out_path", type=str, default="/mnt/server16_hard0/sangmin/code/neurips2024/chair_results/llava", help="output path")
+    parser.add_argument("--data_path", type=str, default="/home/bscho333/data/coco/val2014/", help="data path")
+    parser.add_argument("--anno_path", type=str, default="/home/bscho333/data/coco/annotations/instances_val2014.json")
+    parser.add_argument("--log_path", type=str, default="/home/bscho333/Decoding/output/logs/inference")
+    parser.add_argument("--out_path", type=str, default="/home/bscho333/Decoding/output/inference_results", help="output path")
 
     parser.add_argument("--image_list", type=str, default="/home/bscho333/Decoding/inference/image_list.jsonl")
     parser.add_argument("--question", type=str, default="Please describe this image in detail.")
@@ -116,6 +116,8 @@ def parse_args():
     parser.add_argument("--max_new_tokens", type=int, default=64)
     parser.add_argument("--experiment_index", type=int, default=0)
 
+    # parser.add_argument("--cpu", action="store_true", help="use cpu for inference")
+
     args = parser.parse_known_args()[0]
     return args
 
@@ -132,8 +134,8 @@ def main():
             args.log_path, exist_ok=True
         )  # Make results folder (holds all experiment subfolders)
         model_string_name = args.model_path.split("/")[-1]
-        # experiment_index = len(glob(f"{args.log_path}/{model_string_name}/*")) + args.experiment_index
-        experiment_index = args.experiment_index
+        experiment_index = len(glob(f"{args.log_path}/{model_string_name}/*")) + args.experiment_index
+        # experiment_index = args.experiment_index
         experiment_dir = f"{args.log_path}/{model_string_name}/{experiment_index}"  # Create an experiment folder
         os.makedirs(experiment_dir, exist_ok=True)
         logger = create_logger(experiment_dir)

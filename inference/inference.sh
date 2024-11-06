@@ -24,7 +24,7 @@ ritual_alpha_pos=3.0
 ritual_alpha_neg=1.0
 ritual_beta=0.1
 
-experiment_index=0
+experiment_index=000
 
 num_eval_samples=500
 max_new_tokens=64

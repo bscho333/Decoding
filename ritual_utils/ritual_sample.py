@@ -37,6 +37,69 @@ def sample(
     streamer: Optional["BaseStreamer"] = None,
     **model_kwargs,
 ) -> Union[SampleOutput, torch.LongTensor]:
+
+
+    '''
+    input_ids,
+        tensor([[    1,   319, 13563,  1546,   263, 12758,  5199,   322,   385, 23116,
+             21082, 20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,
+               322,  1248,   568,  6089,   304,   278,  5199, 29915, 29879,  5155,
+             29889,  3148,  1001, 29901, 29871,  -200, 29871,    13, 12148,  8453,
+               445,  1967,   297,  9493, 29889,   319,  1799,  9047, 13566, 29901]],
+           device='cuda:0')
+    logits_processor=logits_processor,
+        <class 'transformers.generation.logits_process.LogitsProcessorList'>
+            []
+    logits_warper=logits_warper,
+        <class 'transformers.generation.logits_process.LogitsProcessorList'>
+            []
+    stopping_criteria=stopping_criteria,
+        <class 'transformers.generation.stopping_criteria.StoppingCriteriaList'>
+            [<transformers.generation.stopping_criteria.MaxLengthCriteria object at 0x7fe1b45097e0>]
+    pad_token_id=generation_config.pad_token_id,
+        0
+    eos_token_id=generation_config.eos_token_id,
+        2
+    output_scores=generation_config.output_scores,
+        False
+    return_dict_in_generate=generation_config.return_dict_in_generate,
+        False
+    synced_gpus=synced_gpus,
+        False
+    streamer=streamer,
+        NONE
+    **model_kwargs,
+        {'images': tensor([[[[-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              ...,
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113]],
+    
+             [[-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              ...,
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112]],
+    
+             [[-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              ...,
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013]]]],
+           device='cuda:0', dtype=torch.float16), 'images_pos': None, 'images_neg': None, 'use_ritual': False, 'use_vcd': False, 'use_m3id': False, 'ritual_alpha_pos': 3, 'ritual_alpha_neg': 1, 'ritual_beta': 0.1, 'use_cache': True, 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1]], device='cuda:0')}
+    '''
+
+
+
+    
     # init values
     logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
     stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
@@ -83,6 +146,7 @@ def sample(
 
     # keep track of which sequences are already finished
     unfinished_sequences = torch.ones(input_ids.shape[0], dtype=torch.long, device=input_ids.device)
+    # tensor([1], device='cuda:0')
 
     this_peer_finished = False  # used by synced_gpus only
 
@@ -188,6 +252,8 @@ def sample(
             next_token_scores = logits
             probs = nn.functional.softmax(next_token_scores, dim=-1)
             next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
+            
+        # PLAIN
         else:
             next_token_scores = logits_processor(input_ids, next_token_logits)
             next_token_scores = logits_warper(input_ids, next_token_scores)

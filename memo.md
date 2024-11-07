@@ -306,14 +306,37 @@ images_tensor = process_images(
 ```
 
 ## model.generate
-### encode_image
-`image_features = self.get_model().get_vision_tower()(images)`\
-`encoded_img = self.get_model().mm_projector(image_features)`
+### image encode
+`encoded_img = self.get_model().get_vision_tower()(images)`
 ```
 encoded_img: torch.Size([1,  576,        1024])
-                        (bs, patch_size, language_hidden_size)
+                        (bs, patch_size, vision_hidden_size)
+
+tensor([[[ 0.7373,  0.2524,  0.4878,  ...,  0.0934,  0.7534,  1.0000],
+          [ 0.5596, -0.8633,  0.5576,  ...,  0.7891,  0.4727,  0.9751],
+          [ 2.0176,  1.1387, -0.3218,  ...,  2.9395,  0.2117,  2.2344],
+          ...,
+          [ 2.0449,  1.1309, -0.0826,  ...,  2.6816,  0.4646,  2.0977],
+          [ 0.9775, -0.4370,  0.5537,  ...,  0.0339,  0.6714,  0.7505],
+          [ 0.6289, -0.3303,  0.9082,  ...,  0.4570,  0.9321,  0.7837]]],
+        dtype=torch.float16),
 ```
 
+### image embed
+`image_features = self.get_model().mm_projector(image_features)`
+```
+image_features: torch.Size([1,  576,        4096])
+                            (bs, patch_size, language_hidden_size)
+
+tensor([[[-0.1654,  0.3359, -0.4175,  ...,  0.0538,  0.5742,  0.0063],
+          [-0.2148,  0.2190, -0.1888,  ..., -0.2893,  0.3076, -0.3088],
+          [ 0.9995,  0.0498, -0.9438,  ...,  0.2761,  0.5044,  0.4685],
+          ...,
+          [ 0.7090,  0.1019, -0.9595,  ...,  0.1685,  0.4329,  0.2478],
+          [-0.0754,  0.4036, -0.4861,  ..., -0.2462,  0.6230, -0.2517],
+          [-0.2542,  0.2216, -0.3010,  ..., -0.5015,  0.6348, -0.4343]]],
+        dtype=torch.float16, grad_fn=<ToCopyBackward0>)
+```
 ## output
 ### output_ids
 ```
@@ -332,3 +355,370 @@ output_ids: torch.Size([1, 114])
               8439,   526,   263,  2846]], device='cuda:0')
 ```
 ### decode
+`outputs = tokenizer.batch_decode(output_ids[:, input_token_len:], skip_special_tokens=True)`
+```
+['The image features a man with a skateboard and a dog, either walking down the street together or crossing the street while holding hands with the dog on a leash. The man appears to be skateboarding with the dog close by, creating a fun and friendly atmosphere. \n\nThere are a few']
+```
+
+### SampleDecoderOnlyOutput
+```
+sequences: torch.LongTensor = None
+scores: Optional[Tuple[torch.FloatTensor]] = None
+attentions: Optional[Tuple[Tuple[torch.FloatTensor]]] = None
+hidden_states: Optional[Tuple[Tuple[torch.FloatTensor]]] = None
+```
+
+# pdb `model.generate()`
+## GPU usage
+### `nvidia-smi`
+```
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.107.02             Driver Version: 550.107.02     CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3090        Off |   00000000:A1:00.0 Off |                  N/A |
+| 38%   34C    P8             21W /  350W |   17660MiB /  24576MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
++-----------------------------------------------------------------------------------------+
+```
+## func `generate()`
+Goes to `/root/miniconda3/envs/RITUAL/lib/python3.10/site-packages/transformers/generation/utils.py(1161)generate()`
+### gemeration_config
+```
+GenerationConfig {
+  "_from_model_config": true,
+  "bos_token_id": 1,
+  "eos_token_id": 2,
+  "max_length": 4096,
+  "pad_token_id": 0,
+  "transformers_version": "4.31.0"
+}
+
+after generation_config.update(**kwargs)
+
+GenerationConfig {
+  "_from_model_config": true,
+  "bos_token_id": 1,
+  "do_sample": true,
+  "eos_token_id": 2,
+  "max_length": 4096,
+  "max_new_tokens": 64,
+  "pad_token_id": 0,
+  "top_k": null,
+  "transformers_version": "4.31.0"
+}
+
+after max token update
+
+GenerationConfig {
+  "_from_model_config": true,
+  "bos_token_id": 1,
+  "do_sample": true,
+  "eos_token_id": 2,
+  "max_length": 114,
+  "max_new_tokens": 64,
+  "pad_token_id": 0,
+  "top_k": null,
+  "transformers_version": "4.31.0"
+}
+```
+### model_kwargs
+```
+{'images': tensor([[[[-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          ...,
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113]],
+
+         [[-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          ...,
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112]],
+
+         [[-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          ...,
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013]]]],
+       device='cuda:0', dtype=torch.float16), 'images_pos': None, 'images_neg': None, 'use_ritual': False, 'use_vcd': False, 'use_m3id': False, 'ritual_alpha_pos': 3, 'ritual_alpha_neg': 1, 'ritual_beta': 0.1, 'output_attentions': False, 'output_hidden_states': False, 'use_cache': True}
+
+accepts_attention_mask=True
+requires_attention_mask=True
+```
+### _prepate_attention_mask_for_generation
+```
+pad_token_id = 0
+eos_token_id = 2
+is_pad_token_not_equal_to_eos_token_id = True
+is_pad_token_in_inputs = False
+
+```
+### etc
+```
+self.config.is_encoder_decoder = False
+input_ids_seq_length = 50
+generation_config.max_length = 114
+is_constraint_gen_mode = False
+is_contrastive_search_gen_mode = False
+is_greedy_gen_mode = False
+is_sample_gen_mode = True
+is_beam_sample_gen_mode = False
+is_group_beam_gen_mode = False
+is_assisted_gen_mode = False
+```
+```
+logits_processor = []
+stopping_criteria = [<transformers.generation.stopping_criteria.MaxLengthCriteria object at 0x7fe1b45097e0>]
+logits_warper = []
+```
+### End of model.generate()
+```
+# 13. run sample
+return self.sample(
+    input_ids,
+    logits_processor=logits_processor,
+    logits_warper=logits_warper,
+    stopping_criteria=stopping_criteria,
+    pad_token_id=generation_config.pad_token_id,
+    eos_token_id=generation_config.eos_token_id,
+    output_scores=generation_config.output_scores,
+    return_dict_in_generate=generation_config.return_dict_in_generate,
+    synced_gpus=synced_gpus,
+    streamer=streamer,
+    **model_kwargs,
+)
+```
+## sample
+Goes to `/root/Decoding/ritual_utils/ritual_sample.py(23)sample()`
+### args
+```
+input_ids,
+    tensor([[    1,   319, 13563,  1546,   263, 12758,  5199,   322,   385, 23116,
+         21082, 20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,
+           322,  1248,   568,  6089,   304,   278,  5199, 29915, 29879,  5155,
+         29889,  3148,  1001, 29901, 29871,  -200, 29871,    13, 12148,  8453,
+           445,  1967,   297,  9493, 29889,   319,  1799,  9047, 13566, 29901]],
+       device='cuda:0')
+logits_processor=logits_processor,
+    <class 'transformers.generation.logits_process.LogitsProcessorList'>
+        []
+logits_warper=logits_warper,
+    <class 'transformers.generation.logits_process.LogitsProcessorList'>
+        []
+stopping_criteria=stopping_criteria,
+    <class 'transformers.generation.stopping_criteria.StoppingCriteriaList'>
+        [<transformers.generation.stopping_criteria.MaxLengthCriteria object at 0x7fe1b45097e0>]
+pad_token_id=generation_config.pad_token_id,
+    0
+eos_token_id=generation_config.eos_token_id,
+    2
+output_scores=generation_config.output_scores,
+    False
+return_dict_in_generate=generation_config.return_dict_in_generate,
+    False
+synced_gpus=synced_gpus,
+    False
+streamer=streamer,
+    NONE
+**model_kwargs,
+    {'images': tensor([[[[-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          ...,
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+          [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113]],
+
+         [[-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          ...,
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+          [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112]],
+
+         [[-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          ...,
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+          [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013]]]],
+       device='cuda:0', dtype=torch.float16), 'images_pos': None, 'images_neg': None, 'use_ritual': False, 'use_vcd': False, 'use_m3id': False, 'ritual_alpha_pos': 3, 'ritual_alpha_neg': 1, 'ritual_beta': 0.1, 'use_cache': True, 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1]], device='cuda:0')}
+```
+
+### initialize
+```
+logits_processor = []
+stopping_criteria = [<transformers.generation.stopping_criteria.MaxLengthCriteria object at 0x7fe1b45097e0>]
+unfinished_sequences = tensor([1], device='cuda:0')
+model_inputs:
+    {'input_ids': tensor([[    1,   319, 13563,  1546,   263, 12758,  5199,   322,   385, 23116,
+             21082, 20255, 29889,   450, 20255,  4076,  8444, 29892, 13173, 29892,
+               322,  1248,   568,  6089,   304,   278,  5199, 29915, 29879,  5155,
+             29889,  3148,  1001, 29901, 29871,  -200, 29871,    13, 12148,  8453,
+               445,  1967,   297,  9493, 29889,   319,  1799,  9047, 13566, 29901]],
+           device='cuda:0'), 'past_key_values': None, 'use_cache': True, 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1]], device='cuda:0'), 'images': tensor([[[[-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              ...,
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113],
+              [-0.0113, -0.0113, -0.0113,  ..., -0.0113, -0.0113, -0.0113]],
+    
+             [[-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              ...,
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112],
+              [-0.0112, -0.0112, -0.0112,  ..., -0.0112, -0.0112, -0.0112]],
+    
+             [[-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              ...,
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013],
+              [-0.0013, -0.0013, -0.0013,  ..., -0.0013, -0.0013, -0.0013]]]],
+           device='cuda:0', dtype=torch.float16)}
+```
+### flow
+from `/root/Decoding/ritual_utils/ritual_sample.py(115)sample()`
+```
+outputs = self(
+    **model_inputs,
+    return_dict=True,
+        True
+    output_attentions=output_attentions, # True?
+        no...False....
+    output_hidden_states=output_hidden_states
+        False
+)
+```
+-> goes to `/root/Decoding/experiments/llava/model/language_model/llava_llama.py(57)forward()`\
+\
+from `/root/Decoding/experiments/llava/model/language_model/llava_llama.py(87)forward()`
+```
+input_ids, attention_mask, past_key_values, inputs_embeds, labels = self.prepare_inputs_labels_for_multimodal(input_ids, attention_mask, past_key_values, labels, images)
+```
+-> calls `/root/Decoding/experiments/llava/model/llava_arch.py(87)prepare_inputs_labels_for_multimodal()`\
+\
+### prepare_inputs_labels_for_multimodal()
+`/root/Decoding/experiments/llava/model/llava_arch.py(87)prepare_inputs_labels_for_multimodal()`\
+```
+image_token_indices: tensor([35], device='cuda:0')
+
+```
+```
+cur_new_input_embeds: torch.Size([625, 4096])
+    tensor([[ 0.0045, -0.0038,  0.0017,  ..., -0.0088,  0.0025, -0.0025],
+            [-0.0112, -0.0129, -0.0121,  ...,  0.0090,  0.0118, -0.0081],
+            [ 0.0195, -0.0058,  0.0061,  ...,  0.0171, -0.0052, -0.0212],
+            ...,
+            [-0.0187, -0.0017,  0.0177,  ...,  0.0238,  0.0052,  0.0101],
+            [ 0.0066, -0.0161,  0.0117,  ..., -0.0103,  0.0148,  0.0073],
+            [ 0.0039,  0.0015,  0.0055,  ..., -0.0042,  0.0151,  0.0024]],
+           device='cuda:0', dtype=torch.float16)
+new_input_embeds = [cur_new_input_embeds]
+new_input_embeds = torch.stack(new_input_embeds, dim=0)
+new_input_embeds.shape: torch.Size([1, 625, 4096])
+```
+
+`new_attn_mask_pad_left = torch.full((attention_mask.shape[0], new_input_embeds.shape[1] - input_ids.shape[1]), True, dtype=attention_mask.dtype, device=attention_mask.device)`
+```
+new_attn_mask_pad_left: torch.Size([1, 575])
+    tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
+           device='cuda:0')
+```
+`attention_mask = torch.cat((new_attn_mask_pad_left, attention_mask), dim=1)`
+```
+attention_mask: torch.Size([1, 625])
+    tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1]], device='cuda:0')
+```
+returns to `/root/Decoding/experiments/llava/model/language_model/llava_llama.py(88)forward()`
+### flow2
+from `/root/Decoding/experiments/llava/model/language_model/llava_llama.py(90)forward()`
+```
+outputs = self.model(
+    input_ids=input_ids,
+    attention_mask=attention_mask,
+    past_key_values=past_key_values,
+    inputs_embeds=inputs_embeds,
+    use_cache=use_cache,
+    output_attentions=output_attentions,
+    output_hidden_states=output_hidden_states,
+    return_dict=return_dict
+)
+```
+-> goes to `/root/miniconda3/envs/RITUAL/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py(599)forward()`

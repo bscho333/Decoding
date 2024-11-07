@@ -120,6 +120,7 @@ class LlavaMetaForCausalLM(ABC):
                 cur_image_idx += 1
                 continue
             image_token_indices = torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0]
+                # image_token_indices: tensor([35], device='cuda:0')
             cur_new_input_embeds = []
             if labels is not None:
                 cur_labels = labels[batch_idx]
@@ -127,7 +128,9 @@ class LlavaMetaForCausalLM(ABC):
                 assert cur_labels.shape == cur_input_ids.shape
             while image_token_indices.numel() > 0:
                 cur_image_features = image_features[cur_image_idx]
+                    # cur_image_features.shape: torch.Size([576, 4096])
                 image_token_start = image_token_indices[0]
+                    # image_token_start: tensor(35, device='cuda:0')
                 if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):
                     cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids[:image_token_start-1]).detach())
                     cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids[image_token_start-1:image_token_start]))
@@ -138,9 +141,13 @@ class LlavaMetaForCausalLM(ABC):
                         cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=labels.device, dtype=labels.dtype))
                         cur_new_labels.append(cur_labels[image_token_start:image_token_start+1])
                         cur_labels = cur_labels[image_token_start+2:]
+
+                # HERE!
                 else:
                     cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids[:image_token_start]))
+                        # cur_new_input_embeds: [torch.Size([35, 4096])]
                     cur_new_input_embeds.append(cur_image_features)
+                        # cur_new_input_embeds: [torch.Size([35, 4096]), torch.Size([576, 4096])]
                     if labels is not None:
                         cur_new_labels.append(cur_labels[:image_token_start])
                         cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=labels.device, dtype=labels.dtype))
@@ -148,14 +155,21 @@ class LlavaMetaForCausalLM(ABC):
                 cur_image_idx += 1
                 if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):
                     cur_input_ids = cur_input_ids[image_token_start+2:]
+
+                # HERE!
                 else:
+                    # torch.Size([50])
                     cur_input_ids = cur_input_ids[image_token_start+1:]
+                    # torch.Size([14])
                 image_token_indices = torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0]
             if cur_input_ids.numel() > 0:
                 if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):
                     cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids).detach())
+
+                # HERE!
                 else:
                     cur_new_input_embeds.append(self.get_model().embed_tokens(cur_input_ids))
+                        # cur_new_input_embeds: [torch.Size([35, 4096]), torch.Size([576, 4096]), torch.Size([14, 4096])]
                 if labels is not None:
                     cur_new_labels.append(cur_labels)
             cur_new_input_embeds = [x.to(device=self.device) for x in cur_new_input_embeds]
@@ -191,6 +205,8 @@ class LlavaMetaForCausalLM(ABC):
                     new_attention_mask.append(cur_new_attention_mask)
                 attention_mask = torch.stack(new_attention_mask, dim=0)
                 assert attention_mask.shape == new_labels.shape
+
+        # HERE!
         else:
             new_input_embeds = torch.stack(new_input_embeds, dim=0)
             if labels is not None:

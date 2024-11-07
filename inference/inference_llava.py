@@ -256,14 +256,14 @@ def main():
     logger.info(f"A: {outputs}")
     logger.info(f"="*50)
 
-    img_save = {}
-    img_save["image_id"] = img_id.item()
-    img_save["caption"] = outputs
+    # img_save = {}
+    # img_save["image_id"] = img_id.item()
+    # img_save["caption"] = outputs
 
-    # dump metric file
-    with open(os.path.join(args.out_path, f"exp_{experiment_index:03d}.jsonl"), "a") as f:
-        json.dump(img_save, f)
-        f.write('\n')
+    # # dump metric file
+    # with open(os.path.join(args.out_path, f"exp_{experiment_index:03d}.jsonl"), "a") as f:
+    #     json.dump(img_save, f)
+    #     f.write('\n')
         
 
 

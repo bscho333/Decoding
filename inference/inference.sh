@@ -4,17 +4,17 @@ seed=42
 
 # llava
 model="llava"
-model_path="/home/bscho333/data/llava-v1.5-7b"
+model_path="/root/data/llava-v1.5-7b"
 
 # instructblip
 # model="instructblip"
 # model_path=None
 
-coco_path="/home/bscho333/data/coco"
+coco_path="/root/data/coco"
 img_path="${coco_path}/val2014/"
 anno_path="${coco_path}/annotations/instances_val2014.json"
-log_path="/home/bscho333/Decoding/output/logs/inference"
-out_path="/home/bscho333/Decoding/output/inference_results"
+log_path="/root/Decoding/output/logs/inference"
+out_path="/root/Decoding/output/inference_results"
 
 use_ritual=False
 use_vcd=False

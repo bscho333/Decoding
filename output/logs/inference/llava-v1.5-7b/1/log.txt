@@ -1,3 +1,9 @@
 [2024-11-06 10:26:49] Experiment directory created at /root/Decoding/output/logs/inference/llava-v1.5-7b/1
 [2024-11-06 10:27:08] Initializing Model
 [2024-11-06 10:39:30] Start eval...
+[2024-11-06 19:34:14] No such comm target registered: jupyter.widget.control
+[2024-11-06 19:34:14] No such comm: c8db77a4-c6eb-45ed-8b18-ac3bd4de8065
+[2024-11-06 19:35:03] No such comm target registered: jupyter.widget.control
+[2024-11-06 19:35:03] No such comm: a03f50a7-02b5-403d-ab96-ee5cd2a78ede
+[2024-11-06 19:44:21] No such comm target registered: jupyter.widget.control
+[2024-11-06 19:44:21] No such comm: d14e8b61-af0e-4085-b911-e983c3dd4c84
